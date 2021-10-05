@@ -12,7 +12,7 @@ import tensorflow as tf
 from sklearn.model_selection import train_test_split
 
 # 파일을 읽기모드로 열고
-# 라인 단위로 끊어서 list 형태로 읽어옵니다.
+# 라인 단위로 끊어서 list 형태로 읽어온다
 
 
 txt_file_path = os.getenv('HOME')+'/aiffel/lyricist/data/lyrics/*'
@@ -21,7 +21,7 @@ txt_list = glob.glob(txt_file_path)
 
 raw_corpus = []
 
-# 여러개의 txt 파일을 모두 읽어서 raw_corpus 에 담습니다.
+# 여러개의 txt 파일을 모두 읽어서 raw_corpus 에 담는다
 for txt_file in txt_list:
     with open(txt_file, "r") as f:
         raw = f.read().splitlines()
@@ -35,10 +35,10 @@ print("Examples:\n", raw_corpus[:3])
 
 
 for idx, sentence in enumerate(raw_corpus):
-    if len(sentence) == 0: continue   # 길이가 0인 문장은 건너뜁니다.
-    if sentence[-1] == ":": continue  # 문장의 끝이 : 인 문장은 건너뜁니다.
+    if len(sentence) == 0: continue   # 길이가 0인 문장은 건너뛴다
+    if sentence[-1] == ":": continue  # 문장의 끝이 : 인 문장은 건너뛴다
 
-    if idx > 9: break   # 일단 문장 10개만 확인해 볼 겁니다.
+    if idx > 9: break   # 일단 문장 10개만 확인해 보자
         
     print(sentence)
 
@@ -49,13 +49,13 @@ for idx, sentence in enumerate(raw_corpus):
 
 
 # 입력된 문장을
-#     1. 소문자로 바꾸고, 양쪽 공백을 지웁니다
+#     1. 소문자로 바꾸고, 양쪽 공백을 지운다
 #     2. 특수문자 양쪽에 공백을 넣고
-#     3. 여러개의 공백은 하나의 공백으로 바꿉니다
-#     4. a-zA-Z?.!,¿가 아닌 모든 문자를 하나의 공백으로 바꿉니다
-#     5. 다시 양쪽 공백을 지웁니다
-#     6. 문장 시작에는 <start>, 끝에는 <end>를 추가합니다
-# 이 순서로 처리해주면 문제가 되는 상황을 방지할 수 있겠네요!
+#     3. 여러개의 공백은 하나의 공백으로 바꾼다
+#     4. a-zA-Z?.!,¿가 아닌 모든 문자를 하나의 공백으로 바꾼다
+#     5. 다시 양쪽 공백을 지운다
+#     6. 문장 시작에는 <start>, 끝에는 <end>를 추가한다
+# 이 순서로 처리하기!
 def preprocess_sentence(sentence):
     sentence = sentence.lower().strip() # 1
     sentence = re.sub(r"([?.!,¿])", r" \1 ", sentence) # 2
@@ -65,8 +65,6 @@ def preprocess_sentence(sentence):
     sentence = '<start> ' + sentence + ' <end>' # 6
     return sentence
 
-# 이 문장이 어떻게 필터링되는지 확인해 보세요.
-print(preprocess_sentence("This @_is ;;;sample        sentence."))
 
 
 # In[17]:
@@ -89,7 +87,7 @@ corpus[:10]
 # In[31]:
 
 
-# 토큰화 할 때 텐서플로우의 Tokenizer와 pad_sequences를 사용합니다
+# 토큰화 할 때 텐서플로우의 Tokenizer와 pad_sequences를 사용
 
 
 
@@ -129,7 +127,7 @@ for idx in tokenizer.index_word:
 # tensor에서 마지막 토큰을 잘라내서 소스 문장을 생성
 # 마지막 토큰은 <end>가 아니라 <pad>일 가능성이 높음
 src_input = tensor[:, :-1]  
-# tensor에서 <start>를 잘라내서 타겟 문장을 생성합니다.
+# tensor에서 <start>를 잘라내서 타겟 문장을 생성
 tgt_input = tensor[:, 1:]    
 
 print(src_input[0])
@@ -223,11 +221,11 @@ def generate_text(model, tokenizer, init_sentence="<start>", max_len=20):
     test_tensor = tf.convert_to_tensor(test_input, dtype=tf.int64)
     end_token = tokenizer.word_index["<end>"]
 
-    # 단어 하나씩 예측해 문장을 만듭니다
+    # 단어 하나씩 예측해 문장을 만든다
     #    1. 입력받은 문장의 텐서를 입력합니다
-    #    2. 예측된 값 중 가장 높은 확률인 word index를 뽑아냅니다
-    #    3. 2에서 예측된 word index를 문장 뒤에 붙입니다
-    #    4. 모델이 <end>를 예측했거나, max_len에 도달했다면 문장 생성을 마칩니다
+    #    2. 예측된 값 중 가장 높은 확률인 word index를 뽑아낸다
+    #    3. 2에서 예측된 word index를 문장 뒤에 붙인다
+    #    4. 모델이 <end>를 예측했거나, max_len에 도달했다면 문장 생성을 마친다
     while True:
         # 1
         predict = model(test_tensor) 
@@ -240,7 +238,7 @@ def generate_text(model, tokenizer, init_sentence="<start>", max_len=20):
         if test_tensor.shape[1] >= max_len: break
 
     generated = ""
-    # tokenizer를 이용해 word index를 단어로 하나씩 변환합니다 
+    # tokenizer를 이용해 word index를 단어로 하나씩 변환 
     for word_index in test_tensor[0].numpy():
         generated += tokenizer.index_word[word_index] + " "
 
